@@ -11,6 +11,7 @@ import YAML from 'yaml';
 import logger from './config/winston';
 import { initDB } from './db/util';
 import errorHandler from './middleware/error_handler';
+import cors from 'cors';
 
 declare module 'express-session' {
     export interface SessionData {
@@ -34,6 +35,14 @@ if (process.env.NODE_ENV !== 'test') {
         .catch((err) => {
             logger.debug(err);
         });
+}
+
+if (process.env.NODE_ENV !== 'production') {
+    app.use(
+        cors({
+            origin: '*',
+        }),
+    );
 }
 
 config();
