@@ -40,9 +40,9 @@ if (process.env.NODE_ENV !== 'test') {
 if (process.env.NODE_ENV !== 'production') {
     app.use(
         cors({
-            origin: '*',
-            methods: '*',
-            allowedHeaders: '*',
+            origin: 'http://localhost:3000',
+            methods: ['GET', 'PUT', 'POST', 'DELETE'],
+            allowedHeaders: ['Content-Type', 'Authorization'],
             credentials: true,
         }),
     );
