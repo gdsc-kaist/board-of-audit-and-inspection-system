@@ -5,9 +5,8 @@ import { validateAuditPeriod, wrapAsync } from '../middleware';
 import { validateOrganization } from '../middleware/auth';
 import { BadRequestError } from '../utils/errors';
 import { uploadFileToS3, deleteFileFromS3 } from '../service/s3';
-import multer from 'multer';
-const upload = multer({ dest: 'uploads/' });
 import fs from 'fs';
+import { upload } from '../config/multer';
 
 export function createExpenseRecordsRouter() {
     const router = express.Router();
