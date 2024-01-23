@@ -1,14 +1,4 @@
 services:
-    postgresql:
-        image: postgres:15
-        restart: always
-        volumes:
-            - pgdata:/var/lib/postgresql/data
-        ports:
-            - 5432:5432
-        environment:
-            POSTGRES_PASSWORD: password
-            TZ: 'Asia/Seoul'
     redis:
         image: redis:7.2-alpine
         restart: always
@@ -20,10 +10,10 @@ services:
         build:
             context: .
             args:
-                - DB_HOST=postgresql
+                - DB_HOST=bai-db-dev.cl9afysuvjrm.ap-northeast-2.rds.amazonaws.com
                 - DB_PORT=5432
                 - DB_USER=postgres
-                - DB_PASSWORD=password
+                - DB_PASSWORD=
         volumes:
             - $PWD/logs:/app/logs
         ports:
