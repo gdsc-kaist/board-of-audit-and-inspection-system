@@ -18,8 +18,8 @@ export const sequelize = new Sequelize(
                 require: true,
                 ca: 'ap-northeast-2-bundle.pem',
                 rejectUnauthorized: false,
-            }
-        }
+            },
+        },
     },
 );
 
