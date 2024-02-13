@@ -12,6 +12,14 @@ export const sequelize = new Sequelize(
         dialect: 'postgres',
         logging: false,
         schema: schemaName,
+        ssl: true,
+        dialectOptions: {
+            ssl: {
+                require: true,
+                ca: 'ap-northeast-2-bundle.pem',
+                rejectUnauthorized: false,
+            },
+        },
     },
 );
 
