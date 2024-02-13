@@ -10,10 +10,10 @@ services:
         build:
             context: .
             args:
-                - DB_HOST=bai-db-dev.cl9afysuvjrm.ap-northeast-2.rds.amazonaws.com
-                - DB_PORT=5432
-                - DB_USER=postgres
-                - DB_PASSWORD=
+                - DB_HOST=${DB_HOST}
+                - DB_PORT=${DB_PORT}
+                - DB_USER=${DB_USER}
+                - DB_PASSWORD=${DB_PASSWORD}
         volumes:
             - $PWD/logs:/app/logs
         ports:
