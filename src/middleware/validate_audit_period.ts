@@ -10,7 +10,9 @@ export async function validateAuditPeriod(
 ) {
     sanitizeInput(req);
 
-    const { year, half } = await findYearAndHalf(req);
+    const today = new Date();
+    const year = today.getFullYear();
+    const half = today.getMonth() < 8 ? 'spring' : 'fall';
 
     const auditPeriod = await AuditPeriod.findOne({
         where: {
@@ -18,12 +20,12 @@ export async function validateAuditPeriod(
             half: half,
         },
     });
+
     if (!auditPeriod) {
         logger.debug(`audit period does not exist`);
         throw new errors.NotFoundError('감사기간이 존재하지 않습니다.');
     }
 
-    const today = new Date();
     if (today < auditPeriod.start || today > auditPeriod.end) {
         logger.debug(`today is not in audit period`);
         throw new errors.ValidationError('감사기간이 아닙니다.');
