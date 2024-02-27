@@ -30,7 +30,7 @@ describe('Middleware: validate_audit_period', function () {
             sinon.restore();
         });
 
-        it('감사기간이 적절할 경우 next()를 호출한다.', async function () {
+        it('Request Parameter에 적절한 감사기간이 들어왔을 경우 next()를 호출한다.', async function () {
             const req = {
                 params: {
                     year: dummyAuditPeriod.year,
@@ -49,7 +49,26 @@ describe('Middleware: validate_audit_period', function () {
             expect(next.calledOnce).to.be.true;
         });
 
-        it('감사기간이 존재하지 않을 경우 NotFoundError를 발생시킨다.', async function () {
+        it('Request body에 적절한 감사기간이 들어왔을 경우 next()를 호출한다.', async function () {
+            const req = {
+                params: {},
+                body: {
+                    year: dummyAuditPeriod.year,
+                    half: dummyAuditPeriod.half,
+                },
+            } as any as Request;
+            const res = {} as any as Response;
+            const next = sinon.spy();
+            clock = sinon.useFakeTimers(validDate);
+            sinon
+                .stub(model.AuditPeriod, 'findOne')
+                .resolves(dummyAuditPeriod as any as model.AuditPeriod);
+
+            await validateAuditPeriod(req, res, next);
+            expect(next.calledOnce).to.be.true;
+        });
+
+        it('request parameter에서 제시된 감사기간이 존재하지 않을 경우 NotFoundError를 발생시킨다.', async function () {
             const req = {
                 params: {
                     year: dummyAuditPeriod.year,
@@ -68,13 +87,53 @@ describe('Middleware: validate_audit_period', function () {
             expect(next.calledOnce).to.be.false;
         });
 
-        it('감사기간이 아닐 경우 ValidationError를 발생시킨다.', async function () {
+        it('request body에서 제시된 감사기간이 존재하지 않을 경우 NotFoundError를 발생시킨다.', async function () {
+            const req = {
+                params: {},
+                body: {
+                    year: dummyAuditPeriod.year,
+                    half: dummyAuditPeriod.half,
+                },
+            } as any as Request;
+            const res = {} as any;
+            const next = sinon.spy();
+            clock = sinon.useFakeTimers(validDate);
+            sinon.stub(model.AuditPeriod, 'findOne').resolves(null);
+
+            expect(
+                validateAuditPeriod(req, res, next),
+            ).eventually.be.rejectedWith(errors.NotFoundError);
+            expect(next.calledOnce).to.be.false;
+        });
+
+        it('parameter: 감사기간이 아닐 경우 ValidationError를 발생시킨다.', async function () {
             const req = {
                 params: {
                     year: dummyAuditPeriod.year,
                     half: dummyAuditPeriod.half,
                 },
                 body: {},
+            } as any as Request;
+            const res = {} as any;
+            const next = sinon.spy();
+            clock = sinon.useFakeTimers(invalidDate);
+            sinon
+                .stub(model.AuditPeriod, 'findOne')
+                .resolves(dummyAuditPeriod as any as model.AuditPeriod);
+
+            expect(
+                validateAuditPeriod(req, res, next),
+            ).eventually.be.rejectedWith(errors.ValidationError);
+            expect(next.calledOnce).to.be.false;
+        });
+
+        it('body: 감사기간이 아닐 경우 ValidationError를 발생시킨다.', async function () {
+            const req = {
+                params: {},
+                body: {
+                    year: dummyAuditPeriod.year,
+                    half: dummyAuditPeriod.half,
+                },
             } as any as Request;
             const res = {} as any;
             const next = sinon.spy();
