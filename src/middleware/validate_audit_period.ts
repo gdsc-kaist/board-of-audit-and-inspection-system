@@ -65,6 +65,11 @@ export async function findYearAndHalf(req: Request) {
             year: req.params.year,
             half: req.params.half,
         });
+    } else if (req.body.year && req.body.half) {
+        return Promise.resolve({
+            year: req.body.year,
+            half: req.body.half,
+        });
     } else if (req.params.budget_id) {
         return await findYearAndHalfByBudgetId(req.params.budget_id);
     } else if (req.params.income_id) {
@@ -74,7 +79,7 @@ export async function findYearAndHalf(req: Request) {
     } else if (req.params.expense_id) {
         return await findYearAndHalfByExpenseId(req.params.expense_id);
     } else if (req.body.expense_id) {
-        return await findYearAndHalfByBudgetId(req.body.expense_id);
+        return await findYearAndHalfByExpenseId(req.body.expense_id);
     }
     throw new errors.BadRequestError('년도와 반기를 찾을 수 없습니다.');
 }
