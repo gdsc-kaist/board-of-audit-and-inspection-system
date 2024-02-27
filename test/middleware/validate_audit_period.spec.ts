@@ -210,7 +210,7 @@ describe('Middleware: validate_audit_period', function () {
                 BudgetId: budget.id,
             });
             transaction = await model.Transaction.create({
-                incomeId: income.id,
+                IncomeId: income.id,
                 projectAt: new Date('2023-04-01'),
                 manager: '김넙죽 매니저',
                 content: '운영비',
