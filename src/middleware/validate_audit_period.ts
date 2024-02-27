@@ -94,6 +94,34 @@ export async function findYearAndHalf(req: Request) {
         return await findYearAndHalfByTransactionId(req.params.transaction_id);
     } else if (req.body.transaction_id) {
         return await findYearAndHalfByTransactionId(req.body.transaction_id);
+    } else if (req.params.transaction_record_id) {
+        return await findYearandHalfByTransactionRecordId(
+            req.params.transaction_record_id,
+        );
+    } else if (req.body.transaction_record_id) {
+        return await findYearandHalfByTransactionRecordId(
+            req.body.transaction_record_id,
+        );
+    } else if (req.params.card_id) {
+        return await findYearAndHalfByCardId(req.params.card_id);
+    } else if (req.body.card_id) {
+        return await findYearAndHalfByCardId(req.body.card_id);
+    } else if (req.params.card_record_id) {
+        return await findYearAndHalfByCardRecordId(req.params.card_record_id);
+    } else if (req.body.card_record_id) {
+        return await findYearAndHalfByCardRecordId(req.body.card_record_id);
+    } else if (req.params.account_id) {
+        return await findYearAndHalfByAccountId(req.params.account_id);
+    } else if (req.body.account_id) {
+        return await findYearAndHalfByAccountId(req.body.account_id);
+    } else if (req.params.account_record_id) {
+        return await findYearAndHalfByAccountRecordId(
+            req.params.account_record_id,
+        );
+    } else if (req.body.account_record_id) {
+        return await findYearAndHalfByAccountRecordId(
+            req.body.account_record_id,
+        );
     }
     throw new errors.BadRequestError('년도와 반기를 찾을 수 없습니다.');
 }
@@ -126,6 +154,77 @@ function sanitizeInput(req: Request) {
     }
 }
 
+async function findYearAndHalfByCardId(card_id: number | string) {
+    const card = await Card.findOne({
+        where: {
+            id: card_id,
+        },
+    });
+    if (!card) {
+        throw new errors.NotFoundError('카드가 존재하지 않습니다.');
+    }
+    logger.info(
+        `find year: ${card.year} and half: ${card.half} by card_id: ${card_id}`,
+    );
+    return {
+        year: card.year,
+        half: card.half,
+    };
+}
+
+async function findYearAndHalfByCardRecordId(card_record_id: number | string) {
+    const cardRecord = await CardRecord.findOne({
+        where: {
+            id: card_record_id,
+        },
+    });
+    if (!cardRecord) {
+        throw new errors.NotFoundError('카드 거래 내역이 존재하지 않습니다.');
+    }
+    logger.info(
+        `find year: ${cardRecord.year} and half: ${cardRecord.half} by card_record_id: ${card_record_id}`,
+    );
+    return {
+        year: cardRecord.year,
+        half: cardRecord.half,
+    };
+}
+
+async function findYearAndHalfByAccountId(account_id: number | string) {
+    const account = await Account.findOne({
+        where: {
+            id: account_id,
+        },
+    });
+    if (!account) {
+        throw new errors.NotFoundError('계좌가 존재하지 않습니다.');
+    }
+    logger.info(
+        `find year: ${account.year} and half: ${account.half} by account_id: ${account_id}`,
+    );
+    return {
+        year: account.year,
+        half: account.half,
+    };
+}
+
+async function findYearAndHalfByAccountRecordId(
+    account_record_id: number | string,
+) {
+    const accountRecord = await AccountRecord.findOne({
+        where: {
+            id: account_record_id,
+        },
+    });
+    if (!accountRecord) {
+        throw new errors.NotFoundError('계좌 거래 내역이 존재하지 않습니다.');
+    }
+    logger.info(
+        `find year and half by referencing the account ${accountRecord.AccountId} of account record ${account_record_id}`,
+    );
+    return findYearAndHalfByAccountId(accountRecord.AccountId);
+}
+
 async function findYearAndHalfByTransactionId(transaction_id: number | string) {
     const transaction = await Transaction.findOne({
         where: {
@@ -143,6 +242,22 @@ async function findYearAndHalfByTransactionId(transaction_id: number | string) {
         return findYearAndHalfByExpenseId(transaction.ExpenseId);
     }
     throw new errors.NotFoundError('수입/지출 항목이 존재하지 않습니다.');
+}
+
+async function findYearandHalfByTransactionRecordId(
+    transaction_record_id: number | string,
+) {
+    const transactionRecord = await TransactionRecord.findOne({
+        where: {
+            id: transaction_record_id,
+        },
+    });
+    if (!transactionRecord) {
+        throw new errors.NotFoundError(
+            '거래 내역 증빙 자료가 존재하지 않습니다.',
+        );
+    }
+    return findYearAndHalfByTransactionId(transactionRecord.TransactionId);
 }
 
 async function findYearAndHalfByBudgetId(budget_id: number | string) {
