@@ -3,7 +3,7 @@ import { sequelize } from '../db';
 
 class CardRecord extends Model {
     declare id: number;
-    declare year: string;
+    declare year: number;
     declare half: string;
     declare URI: string;
     declare OrganizationId: number;
@@ -17,7 +17,7 @@ CardRecord.init(
             primaryKey: true,
         },
         year: {
-            type: DataTypes.STRING,
+            type: DataTypes.INTEGER.UNSIGNED,
             allowNull: false,
         },
         half: {
