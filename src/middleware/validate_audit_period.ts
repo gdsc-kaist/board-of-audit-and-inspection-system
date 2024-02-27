@@ -1,5 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
-import { AuditPeriod, Budget, Income } from '../model';
+import {
+    AuditPeriod,
+    Budget,
+    Income,
+    Transaction,
+    TransactionRecord,
+    Card,
+    CardRecord,
+    Account,
+    AccountRecord,
+} from '../model';
 import * as errors from '../utils/errors';
 import logger from '../config/winston';
 
@@ -80,6 +90,10 @@ export async function findYearAndHalf(req: Request) {
         return await findYearAndHalfByExpenseId(req.params.expense_id);
     } else if (req.body.expense_id) {
         return await findYearAndHalfByExpenseId(req.body.expense_id);
+    } else if (req.params.transaction_id) {
+        return await findYearAndHalfByTransactionId(req.params.transaction_id);
+    } else if (req.body.transaction_id) {
+        return await findYearAndHalfByTransactionId(req.body.transaction_id);
     }
     throw new errors.BadRequestError('년도와 반기를 찾을 수 없습니다.');
 }
@@ -110,6 +124,25 @@ function sanitizeInput(req: Request) {
             'income_id와 expense_id는 동시에 사용할 수 없습니다.',
         );
     }
+}
+
+async function findYearAndHalfByTransactionId(transaction_id: number | string) {
+    const transaction = await Transaction.findOne({
+        where: {
+            id: transaction_id,
+        },
+    });
+
+    if (!transaction) {
+        throw new errors.NotFoundError('거래 내역이 존재하지 않습니다.');
+    }
+
+    if (transaction.IncomeId) {
+        return findYearAndHalfByIncomeId(transaction.IncomeId);
+    } else if (transaction.ExpenseId) {
+        return findYearAndHalfByExpenseId(transaction.ExpenseId);
+    }
+    throw new errors.NotFoundError('수입/지출 항목이 존재하지 않습니다.');
 }
 
 async function findYearAndHalfByBudgetId(budget_id: number | string) {
