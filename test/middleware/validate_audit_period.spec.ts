@@ -249,7 +249,7 @@ describe('Middleware: validate_audit_period', function () {
                 accountOwner: '통장주인',
             });
             account_record = await model.AccountRecord.create({
-                accountId: account.id,
+                AccountId: account.id,
                 URI: 'http://accountrecord.com',
                 note: 'account record note',
             });
