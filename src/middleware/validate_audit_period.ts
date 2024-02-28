@@ -20,11 +20,12 @@ export async function validateAuditPeriod(
 ) {
     sanitizeInput(req);
     const today = new Date();
-    if (req.params.year && req.params.half) {
+    const extracedYearAndHalf = await findYearAndHalf(req);
+    if (extracedYearAndHalf.year && extracedYearAndHalf.half) {
         const auditPeriod = await AuditPeriod.findOne({
             where: {
-                year: req.params.year,
-                half: req.params.half,
+                year: extracedYearAndHalf.year,
+                half: extracedYearAndHalf.half,
             },
         });
 
@@ -32,19 +33,17 @@ export async function validateAuditPeriod(
             logger.debug(`audit period does not exist`);
             throw new errors.NotFoundError('감사기간이 존재하지 않습니다.');
         }
-
         if (today < auditPeriod.start || today > auditPeriod.end) {
             logger.debug(`today is not in audit period`);
             throw new errors.ValidationError('감사기간이 아닙니다.');
         }
-
         logger.info(`audit period is validated`);
         next();
-    } else if (req.params.year || req.params.half) {
+    } else if (extracedYearAndHalf.year || extracedYearAndHalf.half) {
         logger.debug(`year and half must be used together`);
         throw new errors.BadRequestError('년도와 반기는 함께 사용해야 합니다.');
     } else {
-        const { year, half } = getAuditPeriod(today);
+        const { year, half } = getAuditPeriodFromDate(today);
         const auditPeriod = await AuditPeriod.findOne({
             where: {
                 year,
@@ -54,14 +53,14 @@ export async function validateAuditPeriod(
 
         if (!auditPeriod) {
             logger.debug(`audit period does not exist`);
-            throw new errors.NotFoundError('감사기간이 존재하지 않습니다.');
+            throw new errors.NotFoundError(
+                '요청에 대응되는 감사기간이 존재하지 않습니다.',
+            );
         }
 
         if (today < auditPeriod.start || today > auditPeriod.end) {
             logger.debug(`today is not in audit period`);
-            throw new errors.ValidationError(
-                '현재 감사 기간이 아닙니다. 지난 감사기간에 대해 접근하고 싶다면, 연도와 반기를 요청에 명시하여 주세요.',
-            );
+            throw new errors.ValidationError('현재 감사 기간이 아닙니다.');
         }
 
         logger.info(`audit period is validated`);
@@ -123,10 +122,11 @@ export async function findYearAndHalf(req: Request) {
             req.body.account_record_id,
         );
     }
-    throw new errors.BadRequestError('년도와 반기를 찾을 수 없습니다.');
+    logger.debug(`request: ${req}, Audit Period Not Found.`);
+    return { year: null, half: null };
 }
 
-function getAuditPeriod(today: Date) {
+function getAuditPeriodFromDate(today: Date) {
     // Determine the half based on the month. 0201~0731: spring, 0801~0131: fall. If the month is January, use the previous year's fall.
 
     let half;
