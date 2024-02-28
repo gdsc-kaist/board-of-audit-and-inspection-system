@@ -149,6 +149,23 @@ describe('Middleware: validate_audit_period', function () {
             expect(next.calledOnce).to.be.false;
         });
 
+        it('parameter: year와 half 중 하나만 주어졌을 때 BadRequestError를 발생시킨다.', async function () {
+            const req = {
+                params: {
+                    year: dummyAuditPeriod.year,
+                },
+                body: {},
+            } as any as Request;
+            const res = {} as any;
+            const next = sinon.spy();
+            clock = sinon.useFakeTimers(validDate);
+
+            expect(
+                validateAuditPeriod(req, res, next),
+            ).eventually.be.rejectedWith(errors.BadRequestError);
+            expect(next.calledOnce).to.be.false;
+        });
+
         it('body에 income_id와 expense_id가 동시에 존재할 경우 BadRequestError를 발생시킨다.', async function () {
             const req = {
                 body: {
